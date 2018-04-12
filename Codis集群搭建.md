@@ -372,6 +372,7 @@ sentine报警通知脚本
 　　
 
 ##至此服务器端配置完成，接下来进行web配置
+
     解析nginx配置的域名codis-us-bs-sn-fe.mutantbox.online
     
     页面账号密码：codisadmin : y2715jyHefkWHhr
