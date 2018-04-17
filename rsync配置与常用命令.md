@@ -3,7 +3,7 @@
 ####服务端安装配置
 	yum install rsync xinetd -y 
 
-	vim /etc/rsync.conf #编辑配置文件
+	vim /etc/rsyncd.conf #编辑配置文件
 	uid     = nobody	#这里配置nobody,模块目录也一定要nobody
 	gid     = nobody
 	use chroot      = yes
