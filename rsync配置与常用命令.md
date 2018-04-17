@@ -21,6 +21,9 @@
 	
 	ignore errors = yes
 
+	chkconfig rsyncd on
+	/etc/init.d/xinetd restart
+
 
 ####客户端命令
 	rsync -av test/ 10.53.0.188::game_redis_bak	#将本地的test目录下的文件推送到服务端对应的模块下
