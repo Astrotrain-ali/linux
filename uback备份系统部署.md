@@ -719,6 +719,7 @@ echo '
 server_id = '''${SID}'''
 game_id = '''${GAMEID}'''
 op_id = '''${OPID}'''
+interval = 3600
 redis_host = 10.53.0.189
 redis_port = 6381
 redis_queue = uuzuback
