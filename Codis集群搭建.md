@@ -463,6 +463,7 @@ sentine报警通知脚本
     修改项目
     product_name（项目名字和dashboard.toml保持一致）
     product_auth （redis-server验证密码）
+    session_auth = (redis-server验证密码）
     session_auth （proxy验证密码）
     admin_addr （管理端口）
     proxy_addr （proxy端口）
