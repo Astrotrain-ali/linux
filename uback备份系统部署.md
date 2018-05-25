@@ -97,7 +97,7 @@ vim /etc/uuzuback.conf #编辑配置文件
     interval = 0 #每个线程拉取备份后，休息的秒数，可以用来控制拉取速度的
     redis_host = 10.53.0.189 #redis地址
     redis_port = 6381 #redis端口
-    redis_queue = level1 uuzuback_f #队列名称，越前面的优先级越高
+    redis_queue = level1 uuzuback #队列名称，越前面的优先级越高
     log = /var/log/uuzuback.log 
     error_log = /var/log/uuzuback.error
     myip = 10.53.0.188 #本机IP
