@@ -1,4 +1,4 @@
-##mysql主从配置
+﻿##mysql主从配置
 
 **主配置**
 
@@ -139,7 +139,7 @@
 	open-files-limit = 65532
 
 
-
+    授权从节点访问
 	>GRANT REPLICATION SLAVE ON *.* TO 'slave'@'172.31.21.109' IDENTIFIED BY 'edJelrZuAgpNeLyn';
 
 	>FLUSH PRIVILEGES
@@ -296,7 +296,7 @@
 	记录pos位置
 
 **从节点执行**
-
+    指定master地址，和binlog日志位置
 	change master to master_host='172.31.28.45',master_user='slave',master_password='edJelrZuAgpNeLyn',
 	         master_log_file='mysql-bin.000002',master_log_pos=191; 
 	
