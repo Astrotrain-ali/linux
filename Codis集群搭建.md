@@ -346,14 +346,16 @@ Codis 是一个分布式 Redis 解决方案, 对于上层的应用来说, 连接
     sentinel parallel-syncs prod_turkey_clothes_forever3 1
     sentinel failover-timeout prod_turkey_clothes_forever3 180000
 
--   在生产环境中，一般一个三台服务器组建到codis集群可以起多个项目，每个项目有三个proxy，其中到sentine配置示例如下；（每台机器的初次sentine配置相同,每台都监控三个主）
+-   在生产环境中，一般一个三台服务器组建到codis集群可以起多个项目，每个项目有三个proxy，其中sentine配置示例如下；（每台机器的初次sentine配置相同,每台都监控三个主）,如果出现failover-abort-no-good-slave失败的情况，很有可能是在启动哨兵之前有过一次主从切换导致的，此时就需要根据dashboard中的显示选择master的ip端口去配置sentinel,然后再启动。
 ```
 port 26379
 dir "/tmp"
 protected-mode no
 daemonize yes  
 logfile "/var/log/sentinel_26379.log" 
-sentinel monitor prod_clothes_forever1 10.57.0.45 9001 2 
+bind 10.57.0.44
+
+sentinel monitor prod_clothes_forever1 10.57.0.44 9001 2
 sentinel auth-pass prod_clothes_forever1 cSjXC6DPgeX7Cp4xjx6Wl841c
 sentinel down-after-milliseconds prod_clothes_forever1 30000
 sentinel notification-script prod_clothes_forever1 /data/apps/codis/src/github.com/CodisLabs/codis/scripts/notify.sh
@@ -361,14 +363,12 @@ sentinel parallel-syncs prod_clothes_forever1 1
 sentinel failover-timeout prod_clothes_forever1 180000
 
 
-
-sentinel monitor prod_clothes_forever2 10.57.0.44 9002 2
+sentinel monitor prod_clothes_forever2 10.57.0.45 9002 2 
 sentinel auth-pass prod_clothes_forever2 cSjXC6DPgeX7Cp4xjx6Wl841c
 sentinel down-after-milliseconds prod_clothes_forever2 30000
 sentinel notification-script prod_clothes_forever2 /data/apps/codis/src/github.com/CodisLabs/codis/scripts/notify.sh
 sentinel parallel-syncs prod_clothes_forever2 1
 sentinel failover-timeout prod_clothes_forever2 180000
-
 
 
 
