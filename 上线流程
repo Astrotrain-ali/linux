@@ -1,0 +1,43 @@
+上线流程
+项目成立==》购买机器==》创建仓库==》部署环境==》jenkins构建==》域名解析==》项目上线
+
+
+项目架构
+CF：
+	开发语言：erlong
+	数据库：mysql
+	缓存：codis
+BS:
+	开发语言：php
+	数据库：mysql
+	缓存：codis
+LI:
+	开发语言：php
+	数据库：mysql
+	缓存：redis
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+故障
+
+docker容器重启之后服务无法正常响应，需要重启docker服务才能恢复，原因：每次重启docker容器之后，容器的ip都会变动一次，需要重启docekr服务才能重新对容器ip进行映射。后期规避方法
+	1.docker network create --subnet=172.18.0.0/16 mynetwork #创建自定义网络并且指定网断
+	2.docker run -itd --name networkTest1 --net mynetwork --ip 172.18.0.2 centos:latest /bin/bash #创建容器的时候使用自定义网络指定容器ip
+
+web页面显示400 The plain HTTP request was sent to HTTPS port
+	经排查是因为aws配置负载均衡的时候把http的请求转发到了443的目标请求，经过修改http为https后，服务恢复。
+
+
+codis-sentinel出现failover-abort-no-good-slave失败的情况，原因是是在启动哨兵之前有过一次主从切换导致了初次启动哨兵时配置文件里的主节点和dashboar显示的不一样，此时就需要根据dashboard中的显示选择master的ip端口去配置sentinel,然后再启动。
