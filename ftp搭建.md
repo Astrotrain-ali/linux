@@ -56,10 +56,11 @@
 
 
 #基于虚拟用户的ftp配置，将用户限制在指定目录中
+
 一、主配置文件
 
 	vsftpd.conf
-	anonymous_enable=NO
+	anonymous_enable=NO #不允许匿名用户登录	
 	local_enable=YES
 	write_enable=YES
 	local_umask=022
@@ -99,4 +100,10 @@
 	sgbs1!@  # 密码
 
 四、然后添加用户之后 将用户文本信息文件转换为db数据库并使用hash加密 执行
+
  	db_load -T -t hash -f /etc/vsftpd/vuser.list /etc/vsftpd/vsftpd_login.db
+五、配置认证
+
+	vim /etc/pam.d/vsftpd #清空此文件并填入以下内容
+	auth    sufficient      /lib64/security/pam_userdb.so    db=/etc/vsftpd/vsftpd_login
+	account sufficient      /lib64/security/pam_userdb.so    db=/etc/vsftpd/vsftpd_login
