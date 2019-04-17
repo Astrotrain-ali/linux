@@ -1,0 +1,34 @@
+部署jenkins
+安装
+yum install -y docker-ce
+下载镜像
+docker pull jenkinsci/jenkins:2.150.1-alpine
+创建宿主机目录
+mkdir /data/jenkins-workspace
+权限
+chmod 777 /data/jenkins-workspace
+运行
+docker run -p 8090:8080 -v /data/jenkins-workspace/:/var/jenkins_home jenkinsci/jenkins:2.150.1-alpine
+终端会打印安装密钥和密钥文件This may also be found at: /var/jenkins_home/secrets/initialAdminPassword
+我这里的密钥是48b45c893f33485993595c905c85feff
+后台运行
+docker run -d -p 8090:8080 -v /data/jenkins-workspace/:/var/jenkins_home jenkinsci/jenkins:2.150.1-alpine
+-d 后台运行
+8090宿主机监听端口，8080容器监听端口，此处用意是把容器的8080映射到宿主机的8090端口对外提供服务
+/data/jenkins-workspace/宿主机工作目录，/var/jenkins_home容器工作目录，此处用意同端口映射道理
+jenkinsci/jenkins:2.150.1-alpine 镜像名称
+
+
+
+
+
+
+
+
+
+
+
+
+jenkins帐号
+admin
+KiRdc5LKynC4
