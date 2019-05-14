@@ -1,4 +1,4 @@
-﻿# uback备份系统部署
+# uback备份系统部署
 
 ---
 [备份系统githup地址](https://github.com/lustlost/ubackup)
@@ -85,7 +85,7 @@ curl http://localhost:9200    #验证
   
 ```
 git clone https://github.com/Daemon-guo/ubackup.git #下载源码
-python ubackup/server/create_es_mapper.py   #初始化esmapper
+python ubackup/server/create_es_mapper.py   #初始化esmapper,此处需要修改脚本中的url地址才能创建成功，如es_url=('http://127.0.0.1:9200/mappings?pretty'
 cd ubackup/server/
 cp uuzuback.conf /etc/
 vim /etc/uuzuback.conf #编辑配置文件
