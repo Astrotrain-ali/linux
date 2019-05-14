@@ -474,8 +474,13 @@ create database ubackup;    #创建数据库
 ```
 #### dashboard
 ```
+git clone https://github.com/pallets/flask #安装flask
+cd flask
+python setup.py install
 git clone https://github.com/Daemon-guo/ubackup.git #下载源码
 yum install libffi-devel -y     #安装dashboard依赖
+pip install flask-sqlalchemy
+pip install flask_login
 cd ubackup/dashboard
 pip install -r requirements.txt
 vim config.py   #修改config.py，配置好数据库连接串
