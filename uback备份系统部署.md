@@ -465,7 +465,7 @@ vim /etc/my.cnf #配置文件
 
 
 mysql   #用户授权
-    GRANT ALL PRIVILEGES ON *.* TO 'dbmanger'@'127.0.0.1' IDENTIFIED BY 'edJelrZuAgpNeLyn' WITH GRANT OPTION;
+    GRANT ALL PRIVILEGES ON ubackup.* TO 'ubackup'@'127.0.0.1' IDENTIFIED BY 'edJelrZuAgpNeLyn' WITH GRANT OPTION;
     DELETE FROM mysql.user WHERE user in ('root','');
     SELECT user,host FROM mysql.user WHERE user in ('root','');
     FLUSH PRIVILEGES;
@@ -481,12 +481,14 @@ git clone https://github.com/Daemon-guo/ubackup.git #下载源码
 yum install libffi-devel -y     #安装dashboard依赖
 pip install flask-sqlalchemy
 pip install flask_login
+pip install redis
+pip install flask_restless
 cd ubackup/dashboard
 pip install -r requirements.txt
 vim config.py   #修改config.py，配置好数据库连接串
     SECRET_KEY = 'sdbernesemountaindog'
     
-    SQLALCHEMY_DATABASE_URI = 'mysql://dbmanger:edJelrZuAgpNeLyn@127.0.0.1/ubackup?charset=utf8'
+    SQLALCHEMY_DATABASE_URI = 'mysql://ubackup:edJelrZuAgpNeLyn@127.0.0.1/ubackup?charset=utf8'
     SQLALCHEMY_POOL_RECYCLE = 60
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 ln -s /usr/local/mysql/lib/libmysqlclient.so.18 /usr/lib64/libmysqlclient.so.18 #建表语句报错需要执行此命令，原因是没有找到/usr/lib64/libmysqlclient.so.18，所有做一个软连
