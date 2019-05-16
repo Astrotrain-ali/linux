@@ -56,28 +56,36 @@ yum -y install java-1.8.0-openjdk   #安装jdk
 wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.2.1.tar.gz 
 tar xzvf elasticsearch-5.2.1.tar.gz
 mv elasticsearch-5.2.1 /usr/local/elasticsearch
-vim /usr/local/elasticsearch/config/jvm.options 									#修改运行内存大小
+#修改运行内存大小
+vim /usr/local/elasticsearch/config/jvm.options 									
     -Xms1g
     -Xmx1g
-vim /etc/security/limits.conf   													#修改elastic可创建的文件描述符大小
+#修改elastic可创建的文件描述符大小
+vim /etc/security/limits.conf   													
     elastic hard nofile 65536
     elastic soft nofile 65536
-vim /etc/security/limits.d/90-nproc.conf    										#修改限制用户拥有的最大进程数量
+#修改限制用户拥有的最大进程数量
+vim /etc/security/limits.d/90-nproc.conf    										
     *          soft    nproc     1024改为4096
-vim /etc/sysctl.conf    															#修改进程可以拥有的VMA(虚拟内存区域)的数量
+#修改进程可以拥有的VMA(虚拟内存区域)的数量
+vim /etc/sysctl.conf    															
     vm.max_map_count=655360 #新增
 sysctl -p
-groupadd elastic    																#新增elastic组及用户, 因为ES不允许root用户启动
+#新增elastic组及用户, 因为ES不允许root用户启动
+groupadd elastic    																
 useradd elastic -g elastic
 echo 'elastic' | passwd --stdin elastic
 chown -R elastic:elastic /usr/local/elasticsearch    
-vim /usr/local/elasticsearch/config/elasticsearch.yml   							#修改elastic配置文件,由于是单机运行es，只需要改这些配置就ok
+#修改elastic配置文件,由于是单机运行es，只需要改这些配置就ok
+vim /usr/local/elasticsearch/config/elasticsearch.yml   							
     bootstrap.memory_lock: false
     bootstrap.system_call_filter: false
     network.host: 0.0.0.0
 su elastic
-/usr/local/elasticsearch/bin/elasticsearch -d 										#启动elasticsearch   不能使用root用户启动
-curl http://localhost:9200    														#验证
+#启动elasticsearch   不能使用root用户启动
+/usr/local/elasticsearch/bin/elasticsearch -d 
+#验证										
+curl http://localhost:9200    														
 ```
 #### 备份系统
 -   先安装好服务端依赖
