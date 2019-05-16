@@ -49,7 +49,8 @@ read only = yes
 -   10.53.0.188
 #### jdk
 ```
-yum -y install java-1.8.0-openjdk   #安装jdk
+#安装jdk
+yum -y install java-1.8.0-openjdk   
 ```
 #### elastic
 ```
@@ -58,18 +59,18 @@ tar xzvf elasticsearch-5.2.1.tar.gz
 mv elasticsearch-5.2.1 /usr/local/elasticsearch
 #修改运行内存大小
 vim /usr/local/elasticsearch/config/jvm.options 									
-    -Xms1g
-    -Xmx1g
+-Xms1g
+-Xmx1g
 #修改elastic可创建的文件描述符大小
 vim /etc/security/limits.conf   													
-    elastic hard nofile 65536
-    elastic soft nofile 65536
+elastic hard nofile 65536
+elastic soft nofile 65536
 #修改限制用户拥有的最大进程数量
 vim /etc/security/limits.d/90-nproc.conf    										
-    *          soft    nproc     1024改为4096
+*          soft    nproc     1024改为4096
 #修改进程可以拥有的VMA(虚拟内存区域)的数量
 vim /etc/sysctl.conf    															
-    vm.max_map_count=655360 #新增
+vm.max_map_count=655360 #新增
 sysctl -p
 #新增elastic组及用户, 因为ES不允许root用户启动
 groupadd elastic    																
@@ -78,44 +79,47 @@ echo 'elastic' | passwd --stdin elastic
 chown -R elastic:elastic /usr/local/elasticsearch    
 #修改elastic配置文件,由于是单机运行es，只需要改这些配置就ok
 vim /usr/local/elasticsearch/config/elasticsearch.yml   							
-    bootstrap.memory_lock: false
-    bootstrap.system_call_filter: false
-    network.host: 0.0.0.0
+bootstrap.memory_lock: false
+bootstrap.system_call_filter: false
+network.host: 0.0.0.0
 su elastic
 #启动elasticsearch   不能使用root用户启动
 /usr/local/elasticsearch/bin/elasticsearch -d 
 #验证										
 curl http://localhost:9200    														
 ```
-#### 备份系统
+#### 备份系统服务端
 -   先安装好服务端依赖
 -   安装备份源码进行配置
   
 ```
-git clone https://github.com/lustlost/ubackup.git #下载源码
-python ubackup/server/create_es_mapper.py   #初始化esmapper,此处需要修改脚本中的url地址才能创建成功，如r=requests.put('http://127.0.0.1:9200/mappings/',data=json.dumps(a))
+#下载源码
+git clone https://github.com/lustlost/ubackup.git 
+#初始化esmapper,此处注意修改脚本中的url地址中的索引名称，这里取用mappings，如r=requests.put('http://127.0.0.1:9200/mappings/',data=json.dumps(a))
+python ubackup/server/create_es_mapper.py   
 cd ubackup/server/
 cp uuzuback.conf /etc/
-vim /etc/uuzuback.conf #编辑配置文件
-    [global]
-    work_thread = 4 #执行rsync拉取的线程数量
-    rsync_bwlimit = 62000 #rsync带宽限制
-    server_root_path = /data/redisbak/ #本地备份存放根目录
-    reserve = 1000 #单位GB,本机磁盘保留大小，如果小于这个值就会有错误日志输出
-    interval = 0 #每个线程拉取备份后，休息的秒数，可以用来控制拉取速度的
-    redis_host = 10.53.0.189 #redis地址
-    redis_port = 6381 #redis端口
-    redis_queue = level1 galaxy #队列名称，越前面的优先级越高
-    log = /var/log/uuzuback.log 
-    error_log = /var/log/uuzuback.error
-    myip = 10.53.0.188 #本机IP
-    retry = 3 #拉取重试次数
-    message_redis_host=10.53.0.189 #全局队列地址
-    message_redis_port=6381 #全局队列端口
-    message_queue=galaxy #全局队列名称
-    mysqlkeeptime = 15 #保留字段
-    rediskeeptime = 15 #保留字段
-    node_id=1 #节点ID，从Dashboard中获取，用于上报节点信息用
+#配置文件
+vim /etc/uuzuback.conf 
+[global]
+work_thread = 4 #执行rsync拉取的线程数量
+rsync_bwlimit = 62000 #rsync带宽限制
+server_root_path = /data/redisbak/ #本地备份存放根目录
+reserve = 1000 #单位GB,本机磁盘保留大小，如果小于这个值就会有错误日志输出
+interval = 0 #每个线程拉取备份后，休息的秒数，可以用来控制拉取速度的
+redis_host = 10.53.0.189 #redis地址
+redis_port = 6381 #redis端口
+redis_queue = level1 galaxy #队列名称，越前面的优先级越高
+log = /var/log/uuzuback.log 
+error_log = /var/log/uuzuback.error
+myip = 10.53.0.188 #本机IP
+retry = 3 #拉取重试次数
+message_redis_host=10.53.0.189 #全局队列地址
+message_redis_port=6381 #全局队列端口
+message_queue=galaxy #全局队列名称
+mysqlkeeptime = 15 #保留字段
+rediskeeptime = 15 #保留字段
+node_id=1 #节点ID，从Dashboard中获取，用于上报节点信息用
 ```
 -   启动服务
 ```
