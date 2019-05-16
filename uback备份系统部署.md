@@ -84,8 +84,8 @@ curl http://localhost:9200    #验证
 -   安装备份源码进行配置
   
 ```
-git clone https://github.com/Daemon-guo/ubackup.git #下载源码
-python ubackup/server/create_es_mapper.py   #初始化esmapper,此处需要修改脚本中的url地址才能创建成功，如es_url=('http://127.0.0.1:9200/mappings?pretty'
+git clone https://github.com/lustlost/ubackup.git #下载源码
+python ubackup/server/create_es_mapper.py   #初始化esmapper,此处需要修改脚本中的url地址才能创建成功，如r=requests.put('http://127.0.0.1:9200/mappings/',data=json.dumps(a))
 cd ubackup/server/
 cp uuzuback.conf /etc/
 vim /etc/uuzuback.conf #编辑配置文件
@@ -93,18 +93,18 @@ vim /etc/uuzuback.conf #编辑配置文件
     work_thread = 4 #执行rsync拉取的线程数量
     rsync_bwlimit = 62000 #rsync带宽限制
     server_root_path = /data/redisbak/ #本地备份存放根目录
-    reserve = 1000 #本机保留大小
+    reserve = 1000 #单位GB,本机磁盘保留大小，如果小于这个值就会有错误日志输出
     interval = 0 #每个线程拉取备份后，休息的秒数，可以用来控制拉取速度的
     redis_host = 10.53.0.189 #redis地址
     redis_port = 6381 #redis端口
-    redis_queue = level1 uuzuback #队列名称，越前面的优先级越高
+    redis_queue = level1 galaxy #队列名称，越前面的优先级越高
     log = /var/log/uuzuback.log 
     error_log = /var/log/uuzuback.error
     myip = 10.53.0.188 #本机IP
     retry = 3 #拉取重试次数
     message_redis_host=10.53.0.189 #全局队列地址
     message_redis_port=6381 #全局队列端口
-    message_queue=message #全局队列名称
+    message_queue=galaxy #全局队列名称
     mysqlkeeptime = 15 #保留字段
     rediskeeptime = 15 #保留字段
     node_id=1 #节点ID，从Dashboard中获取，用于上报节点信息用
@@ -129,6 +129,7 @@ vim /usr/local/ubackup/server/to_es.py  #打开to_es.py修改5-9行的redis,es,d
     message_queue='message'
     es_url='http://10.53.0.188:9200'
     dashboard_url='http://10.53.0.189:5000'
+	r=requests.post("/mappings/table/"%es_url,data=json.dumps(message)) #修改此处写死的url
 /etc/init.d/supervisord restart #使用supervisord启动
 chkconfig supervisord on    #开机自启
 ```
@@ -477,7 +478,7 @@ create database ubackup;    #创建数据库
 git clone https://github.com/pallets/flask #安装flask
 cd flask
 python setup.py install
-git clone https://github.com/Daemon-guo/ubackup.git #下载源码
+git clone https://github.com/lustlost/ubackup.git #下载源码
 yum install libffi-devel -y     #安装dashboard依赖
 pip install flask-sqlalchemy
 pip install flask_login
@@ -485,6 +486,9 @@ pip install redis
 pip install flask_restless
 cd ubackup/dashboard
 pip install -r requirements.txt
+vim /usr/local/ubackup/dashboard/myapp/views/front.py # 修改备份列表获取地址和显示信息
+	b = requests.get("http://127.0.0.1:9200/mappings/table/_search", data=json.dumps(q_string))
+	return json.dumps(b.json())
 vim config.py   #修改config.py，配置好数据库连接串
     SECRET_KEY = 'sdbernesemountaindog'
     
@@ -550,7 +554,7 @@ python update_disk.py 加入crontab
     op_id = 1
     redis_host = 0.0.0.0
     redis_port = 6381
-    redis_queue = uuzuback
+    redis_queue = message
     my_ip = 127.0.0.0.1
     log = /var/log/uuzu_back.log
     error_log = /var/log/uuzu_back.error
