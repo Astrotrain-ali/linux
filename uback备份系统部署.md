@@ -1014,6 +1014,7 @@ service crond restart
 ```
 
 #单机部署
+
 ##服务端依赖安装
 ```
 yum install supervisor MySQL-python mariadb java-1.8.0-openjdk -y
