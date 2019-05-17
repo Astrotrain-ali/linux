@@ -123,25 +123,27 @@ node_id=1 #节点ID，从Dashboard中获取，用于上报节点信息用
 ```
 -   启动服务
 ```
-vim /etc/supervisord.conf #加入配置段，server端执行文件路径根据实际情况配置
-    [program:uuzu_backup_server]
-    command=/usr/bin/python /usr/local/ubackup/server/uuzubackup_server.py
-    autorestart=true
-    autostart=true
-    stdout_logfile=/var/log/uuzu_backup_server.log
+#加入配置段，server端执行文件路径根据实际情况配置，在启动to_es.py之前一定要确保es和dashboard可以访问
+vim /etc/supervisord.conf 
+[program:uuzu_backup_server]
+command=/usr/bin/python /usr/local/ubackup/server/uuzubackup_server.py
+autorestart=true
+autostart=true
+stdout_logfile=/var/log/uuzu_backup_server.log
     
-    [program:to_es]
-    command=/usr/bin/python /usr/local/ubackup/server/to_es.py
-    autorestart=true
-    autostart=true
-    stdout_logfile=/var/log/uuzu_backup_to_es.log
-vim /usr/local/ubackup/server/to_es.py  #打开to_es.py修改5-9行的redis,es,dashboard连接信息
-    redis_handle = Redis(host='10.53.0.189',port=6381)
-    redis_handle_ex = Redis(host='10.53.0.189',port=6381,db=9)
-    message_queue='message'
-    es_url='http://10.53.0.188:9200'
-    dashboard_url='http://10.53.0.189:5000'
-	r=requests.post("/mappings/table/"%es_url,data=json.dumps(message)) #修改此处写死的url
+[program:to_es]
+command=/usr/bin/python /usr/local/ubackup/server/to_es.py
+autorestart=true
+autostart=true
+stdout_logfile=/var/log/uuzu_backup_to_es.log
+#打开to_es.py修改5-9行的redis,es,dashboard连接信息
+vim /usr/local/ubackup/server/to_es.py  
+redis_handle = Redis(host='10.53.0.189',port=6381)
+redis_handle_ex = Redis(host='10.53.0.189',port=6381,db=9)
+message_queue='message'
+es_url='http://10.53.0.188:9200'
+dashboard_url='http://10.53.0.189:5000'
+r=requests.post("/mappings/table/"%es_url,data=json.dumps(message)) #修改此处写死的url
 /etc/init.d/supervisord restart #使用supervisord启动
 chkconfig supervisord on    #开机自启
 ```
@@ -487,29 +489,37 @@ create database ubackup;    #创建数据库
 ```
 #### dashboard
 ```
-git clone https://github.com/pallets/flask #安装flask
+#安装flask
+git clone https://github.com/pallets/flask 
 cd flask
 python setup.py install
-git clone https://github.com/lustlost/ubackup.git #下载源码
-yum install libffi-devel -y     #安装dashboard依赖
+#下载源码
+git clone https://github.com/lustlost/ubackup.git 
+#安装dashboard依赖
+yum install libffi-devel -y     
 pip install flask-sqlalchemy
 pip install flask_login
 pip install redis
 pip install flask_restless
 cd ubackup/dashboard
 pip install -r requirements.txt
-vim /usr/local/ubackup/dashboard/myapp/views/front.py # 修改备份列表获取地址和显示信息
-	b = requests.get("http://127.0.0.1:9200/mappings/table/_search", data=json.dumps(q_string))
-	return json.dumps(b.json())
-vim config.py   #修改config.py，配置好数据库连接串
-    SECRET_KEY = 'sdbernesemountaindog'
+#修改备份列表获取地址和显示信息
+vim /usr/local/ubackup/dashboard/myapp/views/front.py 
+b = requests.get("http://127.0.0.1:9200/mappings/table/_search", data=json.dumps(q_string))
+return json.dumps(b.json())
+#修改config.py，配置好数据库连接串
+vim config.py   
+SECRET_KEY = 'sdbernesemountaindog'
     
-    SQLALCHEMY_DATABASE_URI = 'mysql://ubackup:edJelrZuAgpNeLyn@127.0.0.1/ubackup?charset=utf8'
-    SQLALCHEMY_POOL_RECYCLE = 60
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
-ln -s /usr/local/mysql/lib/libmysqlclient.so.18 /usr/lib64/libmysqlclient.so.18 #建表语句报错需要执行此命令，原因是没有找到/usr/lib64/libmysqlclient.so.18，所有做一个软连
+SQLALCHEMY_DATABASE_URI = 'mysql://ubackup:edJelrZuAgpNeLyn@127.0.0.1/ubackup?charset=utf8'
+SQLALCHEMY_POOL_RECYCLE = 60
+SQLALCHEMY_TRACK_MODIFICATIONS = True
+#建表语句报错需要执行此命令，原因是没有找到/usr/lib64/libmysqlclient.so.18，所有做一个软连
+ln -s /usr/local/mysql/lib/libmysqlclient.so.18 /usr/lib64/libmysqlclient.so.18 
+#创建数据库
 python -c 'from myapp import db;db.create_all()'
-nohup python runserver.py  &    #运行dashoboard
+#运行dashoboard
+nohup python runserver.py  &    
 ```
 #### 备份系统
 ```
@@ -1001,4 +1011,89 @@ service crond restart
 
 
 
+```
+
+#单机部署
+##服务端依赖安装
+```
+yum install supervisor MySQL-python mariadb java-1.8.0-openjdk -y
+pip install request
+pip install redis
+```
+##redis安装启动
+```
+yum install redis -y
+```
+##mysql安装启动
+```
+yum install mariadb -y
+GRANT ALL PRIVILEGES ON ubackup.* TO 'ubackup'@'127.0.0.1' IDENTIFIED BY 'edJelrZuAgpNeLyn'
+```
+##es安装启动
+```
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.2.1.tar.gz
+tar xzvf elasticsearch-5.2.1.tar.gz
+mv elasticsearch-5.2.1 /usr/local/elasticsearch
+groupadd elastic
+useradd elastic -g elastic
+echo 'elastic' | passwd --stdin elastic
+vim /usr/local/elasticsearch/config/jvm.options			
+-Xms1g
+-Xmx1g
+vim /etc/security/limits.conf
+elastic hard nofile 65536
+elastic soft nofile 65536
+vim /etc/security/limits.d/90-nproc.conf
+*          soft    nproc     4096
+vim /etc/sysctl.conf 
+vm.max_map_count=655360
+sysctl -p
+vim /usr/local/elasticsearch/config/elasticsearch.yml
+bootstrap.memory_lock: false
+bootstrap.system_call_filter: false
+network.host: 0.0.0.0
+su elastic
+/usr/local/elasticsearch/bin/elasticsearch -d 
+curl http://localhost:9200
+```
+
+##dashboard安装启动
+```
+git clone https://github.com/pallets/flask
+cd flask
+python setup.py install
+yum install libffi-devel -y
+pip install -r requirements.txt
+cd ubackup/dashboard
+vim config.py
+python -c 'from myapp import db;db.create_all()'
+nohup python runserver.py  &
+```
+
+##备份系统安装启动
+```
+git clone https://github.com/lustlost/ubackup.git
+python ubackup/server/create_es_mapper.py
+cd ubackup/server/
+cp uuzuback.conf /etc/
+vim /usr/local/ubackup/server/to_es.py#配置
+vim /etc/supervisord.conf#配置
+[program:uuzu_backup_server]
+command=/usr/bin/python /usr/local/ubackup/server/uuzubackup_server.py
+autorestart=true
+autostart=true
+stdout_logfile=/var/log/uuzu_backup_server.log   
+[program:to_es]
+command=/usr/bin/python /usr/local/ubackup/server/to_es.py
+autorestart=true
+autostart=true
+stdout_logfile=/var/log/uuzu_backup_to_es.log
+systemctl restart supervisord
+```
+
+##磁盘和队列信息上报
+```
+修改脚本中的dashboard_url
+* * * * * /usr/bin/python /usr/local/ubackup/server/update_disk.py 1
+* * * * * /usr/bin/python /opt/ubackup/server/update_queue.py 1
 ```
