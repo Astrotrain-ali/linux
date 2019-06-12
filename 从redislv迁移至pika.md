@@ -22,3 +22,9 @@ cd /usr/local/redis-port/bin
 ./redis-sync -m 127.0.0.1:6382 -t 127.0.0.1:6381
 [100.00%] #检测到此字段即为同步完成，完成之后进程不会退出，通过 Ctrl+C 命令或者其他方式终止工具的执行，即可停止数据同步。
 ```
+
+###脚本使用
+```
+python redislv_to_pika.py -p xgame -P all -s 993 -c sync
+python redislv_to_pika.py -p xgame -P all -s 993 -c set
+```
